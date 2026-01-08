@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Live Team Selection Board</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body { font-family: Arial, sans-serif; margin:20px; }
+    h1 { margin: 0 0 6px 0; }
+    .sub { color:#666; font-size:13px; margin-bottom:14px; }
+
+    .layout { display:grid; grid-template-columns: 280px 1fr; gap:16px; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+    .card { border:1px solid #ddd; border-radius:10px; padding:12px; background:#fff; }
+    .card h3 { margin:0 0 10px 0; font-size:14px; }
+
+    .pill { display:inline-block; padding:6px 10px; border:1px solid #ddd; border-radius:999px; font-size:12px; color:#444; background:#fafafa; }
+
+    .player {
+      padding:8px 10px; border:1px solid #eee; border-radius:10px;
+      margin-bottom:8px; cursor:pointer; font-size:13px;
+    }
+    .player:hover { border-color:#ccc; }
+    .player.selected { border-color:#111; background:#f5f5f5; }
+
+    .team { margin-bottom:14px; }
+    .team-title { font-weight:bold; margin-bottom:8px; }
+
+    table { width:100%; border-collapse:collapse; }
+    th, td { border-bottom:1px solid #eee; padding:8px 8px; font-size:13px; vertical-align:top; }
+    th { text-align:left; color:#666; font-weight:bold; background:#fafafa; }
+    tr:last-child td { border-bottom:none; }
+
+    .slot-btn {
+      padding:6px 10px; border:1px solid #ddd; border-radius:10px;
+      background:#fff; cursor:pointer; font-size:12px;
+    }
+    .slot-btn:hover { border-color:#bbb; }
+
+    .small { font-size:12px; color:#666; }
+    .warn { background:#fff6d6; border:1px solid #f1d48a; padding:10px; border-radius:10px; color:#6a4b00; font-size:13px; }
+  </style>
+</head>
+
+<body>
+  <h1>{{ board_title|default:"Live Team Selection Board" }}</h1>
+  <div class="sub">Click a player (left), then click a slot (right) to assign. Use Clear to remove a player from a slot.</div>
+
+  {% if board_missing %}
+    <div class="warn">
+      Board not found in database. Create a TeamSelection with title: <b>{{ board_title }}</b> and create slots for teams.
+    </div>
+  {% endif %}
+
+  <div class="layout">
+
+    <!-- LEFT: Player Pool -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <h3>Player Pool</h3>
+        <span class="pill">Total: {{ players|length }}</span>
+      </div>
+
+      {% if players %}
+        <div id="playerList">
+          {% for p in players %}
+            <div class="player" data-player-id="{{ p.id }}">
+              {{ p.last_name }}, {{ p.first_name }}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="small">No players yet. Add some in Admin → Players.</div>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT: Teams / Slots -->
+    <div class="card">
+      <h3>Teams</h3>
+
+      {% if teams %}
+        {% for team_name, slots in teams.items %}
+          <div class="team">
+            <div class="team-title">{{ team_name }}</div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:70px;">Slot</th>
+                  <th>Player</th>
+                  <th style="width:90px;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for s in slots %}
+                  <tr>
+                    <td><b>{{ s.slot_number }}</b></td>
+                    <td>
+                      {% if s.player %}
+                        {{ s.player }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+                    <td>
+                      <button class="slot-btn assign"
+                              data-team-name="{{ team_name }}"
+                              data-slot-number="{{ s.slot_number }}">
+                        Assign
+                      </button>
+
+                      <button class="slot-btn clear"
+                              data-slot-id="{{ s.id }}">
+                        Clear
+                      </button>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="small">No teams/slots found yet.</div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <script>
+    // ---- CSRF helper ----
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // ---- Player selection ----
+    let selectedPlayerId = null;
+    document.querySelectorAll('.player').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.player').forEach(p => p.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedPlayerId = parseInt(el.dataset.playerId, 10);
+      });
+    });
+
+    // ---- Assign ----
+    document.querySelectorAll('.assign').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!selectedPlayerId) {
+          alert("Select a player first.");
+          return;
+        }
+
+        const payload = {
+          player_id: selectedPlayerId,
+          team_name: btn.dataset.teamName,
+          slot_number: parseInt(btn.dataset.slotNumber, 10),
+        };
+
+        const res = await fetch("{% url 'assign_player' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          alert("Assign failed:\n\n" + text);
+          return;
+        }
+
+        // simplest: reload to reflect changes
+        window.location.reload();
+      });
+    });
+
+    // ---- Clear ----
+    document.querySelectorAll('.clear').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const payload = { slot_id: parseInt(btn.dataset.slotId, 10) };
+
+        const res = await fetch("{% url 'clear_slot' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          alert("Clear failed:\n\n" + text);
+          return;
+        }
+
+        window.location.reload();
+      });
+    });
+  </script>
+</body>
+</html>
