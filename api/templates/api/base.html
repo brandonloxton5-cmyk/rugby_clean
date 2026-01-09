@@ -1,0 +1,113 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Bobbies Portal{% endblock %}</title>
+
+<style>
+:root{
+  --bg:#f8f9fb;
+  --card:#ffffff;
+  --border:#e1e6ec;
+  --text:#14181c;
+  --muted:#5a626c;
+
+  --red:#b02c33;
+  --blue:#205791;
+  --yellow:#e8c33d;
+  --green:#3a8460;
+}
+
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:var(--bg);
+}
+
+/* Rose watermark */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:url("{% static 'api/img/rose.png' %}") no-repeat 15% 10%;
+  background-size:900px auto;
+  opacity:.10;
+  pointer-events:none;
+  z-index:-1;
+}
+
+.wrap{max-width:1200px;margin:24px auto;padding:0 18px;}
+
+.topbar{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:14px;
+}
+
+.brand{display:flex;align-items:center;gap:12px;}
+.brand img{width:52px;height:52px;}
+.brand b{font-size:18px;}
+.brand small{color:var(--muted);display:block;}
+
+.nav{display:flex;gap:10px;}
+.pill{
+  padding:10px 14px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:white;
+  text-decoration:none;
+  font-weight:700;
+  color:var(--text);
+}
+
+.right{display:flex;gap:10px;align-items:center;}
+.chip{padding:10px 14px;border:1px solid var(--border);border-radius:18px;color:var(--muted);}
+.logout{color:var(--red);font-weight:700;text-decoration:none;}
+
+.card{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:18px;
+  margin-top:18px;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="{% static 'api/img/rose.png' %}">
+      <div>
+        <b>Bobbies Portal</b>
+        <small>BFN Police Rugby Club • Managers</small>
+      </div>
+    </div>
+
+    <div class="nav">
+      <a class="pill" href="{% url 'home' %}">Home</a>
+      <a class="pill" href="{% url 'team' %}">Team</a>
+      <a class="pill" href="{% url 'bulletin' %}">Bulletin</a>
+    </div>
+
+    <div class="right">
+      <div class="chip">Logged in: <b>{{ request.user.username }}</b></div>
+      <a class="logout" href="{% url 'logout' %}">Logout</a>
+    </div>
+  </div>
+
+  {% block content %}{% endblock %}
+
+</div>
+</body>
+</html>
