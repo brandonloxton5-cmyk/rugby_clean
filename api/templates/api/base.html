@@ -24,6 +24,7 @@ body{
   margin:0;
   font-family: Arial, sans-serif;
   background:var(--bg);
+  color: var(--text);
 }
 
 /* Rose watermark */
@@ -33,7 +34,7 @@ body::before{
   inset:0;
   background:url("{% static 'api/img/rose.png' %}") no-repeat 15% 10%;
   background-size:900px auto;
-  opacity:.10;
+  opacity:.10; /* keep as you like */
   pointer-events:none;
   z-index:-1;
 }
@@ -54,7 +55,7 @@ body::before{
 
 .brand{display:flex;align-items:center;gap:12px;}
 .brand img{width:52px;height:52px;}
-.brand b{font-size:18px;}
+.brand b{font-size:18px; color: var(--text);}
 .brand small{color:var(--muted);display:block;}
 
 .nav{display:flex;gap:10px;flex-wrap:wrap;}
@@ -69,7 +70,13 @@ body::before{
 }
 
 .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-.chip{padding:10px 14px;border:1px solid var(--border);border-radius:18px;color:var(--muted);}
+.chip{
+  padding:10px 14px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  color:var(--muted);
+  background:#fff;
+}
 .logout{color:var(--red);font-weight:700;text-decoration:none;}
 
 .card{
@@ -86,3 +93,36 @@ body::before{
 <div class="wrap">
 
   <div class="topbar">
+    <div class="brand">
+      <img src="{% static 'api/img/rose.png' %}" alt="Bobbies">
+      <div>
+        <b>Bobbies Portal</b>
+        <small>BFN Police Rugby Club • Managers</small>
+      </div>
+    </div>
+
+    <div class="nav">
+      <a class="pill" href="{% url 'home' %}">Home</a>
+      <a class="pill" href="{% url 'live_board' %}">View Board</a>
+      {% if can_edit %}
+        <a class="pill" href="{% url 'selection' %}">Edit Board</a>
+      {% endif %}
+      <a class="pill" href="/bulletin/">Bulletin</a>
+      <a class="pill" href="/admin/">Admin</a>
+    </div>
+
+    <div class="right">
+      <div class="chip">
+        Logged in: <b>{% if request.user.is_authenticated %}{{ request.user.username }}{% else %}Guest{% endif %}</b>
+      </div>
+      {% if request.user.is_authenticated %}
+        <a class="logout" href="/admin/logout/">Logout</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% block content %}{% endblock %}
+
+</div>
+</body>
+</html>
