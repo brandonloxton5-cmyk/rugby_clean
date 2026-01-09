@@ -116,10 +116,16 @@ USE_I18N = True
 USE_TZ = True
 
 # ------------------------------------------------------------
-# Static files (Render/Whitenoise)
+# Static files
 # ------------------------------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Optional: if you have a /static folder in repo
-STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").e]()_
+STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    }
+}
