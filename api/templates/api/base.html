@@ -57,7 +57,7 @@ body::before{
 .brand b{font-size:18px;}
 .brand small{color:var(--muted);display:block;}
 
-.nav{display:flex;gap:10px;}
+.nav{display:flex;gap:10px;flex-wrap:wrap;}
 .pill{
   padding:10px 14px;
   border:1px solid var(--border);
@@ -68,7 +68,7 @@ body::before{
   color:var(--text);
 }
 
-.right{display:flex;gap:10px;align-items:center;}
+.right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 .chip{padding:10px 14px;border:1px solid var(--border);border-radius:18px;color:var(--muted);}
 .logout{color:var(--red);font-weight:700;text-decoration:none;}
 
@@ -86,28 +86,3 @@ body::before{
 <div class="wrap">
 
   <div class="topbar">
-    <div class="brand">
-      <img src="{% static 'api/img/rose.png' %}">
-      <div>
-        <b>Bobbies Portal</b>
-        <small>BFN Police Rugby Club • Managers</small>
-      </div>
-    </div>
-
-    <div class="nav">
-      <a class="pill" href="{% url 'home' %}">Home</a>
-      <a class="pill" href="{% url 'team' %}">Team</a>
-      <a class="pill" href="{% url 'bulletin' %}">Bulletin</a>
-    </div>
-
-    <div class="right">
-      <div class="chip">Logged in: <b>{{ request.user.username }}</b></div>
-      <a class="logout" href="{% url 'logout' %}">Logout</a>
-    </div>
-  </div>
-
-  {% block content %}{% endblock %}
-
-</div>
-</body>
-</html>
