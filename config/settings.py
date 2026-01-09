@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     # your app(s)
     "api",
+    "bulletin",
 ]
 
 MIDDLEWARE = [
