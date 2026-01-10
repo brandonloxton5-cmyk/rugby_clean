@@ -2,6 +2,8 @@
 from pathlib import Path
 import os
 
+import dj_database_url
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ------------------------------------------------------------
@@ -15,12 +17,13 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes", "on")
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
-# Allow hosts (RenderENDER + local)
+# Allow hosts (Render + local)
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com"]
 extra_hosts = os.environ.get("ALLOWED_HOSTS", "")
 if extra_hosts:
     ALLOWED_HOSTS += [h.strip() for h in extra_hosts.split(",") if h.strip()]
 
+# CSRF trusted origins (add your custom domain here if you use one)
 CSRF_TRUSTED_ORIGINS = [
     "https://*.onrender.com",
 ]
@@ -83,19 +86,15 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # ------------------------------------------------------------
-# Database
+# Database (Render Postgres via DATABASE_URL)
 # ------------------------------------------------------------
-# Keep this simple and stable: default to sqlite if DATABASE_URL not set.
-# (Your admin works already, so DB is not the problem right now.)
+# Uses DATABASE_URL if set (Render Postgres). Falls back to SQLite locally.
 DATABASES = {
-    "default": {
-        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("DB_NAME", str(BASE_DIR / "db.sqlite3")),
-        "USER": os.environ.get("DB_USER", ""),
-        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
-        "HOST": os.environ.get("DB_HOST", ""),
-        "PORT": os.environ.get("DB_PORT", ""),
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        ssl_require=not DEBUG,
+    )
 }
 
 # ------------------------------------------------------------
@@ -130,3 +129,5 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     }
 }
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
