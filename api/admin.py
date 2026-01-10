@@ -9,8 +9,11 @@ from .models import (
 
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ("first_name", "last_name")
-    search_fields = ("first_name", "last_name")
+    list_display = ("first_name", "last_name", "available", "injured", "fees_paid", "phone_number", "id_number")
+    list_filter = ("available", "injured", "fees_paid")
+    search_fields = ("first_name", "last_name", "phone_number", "id_number")
+    list_editable = ("available", "injured", "fees_paid")
+    ordering = ("first_name", "last_name")
 
 
 @admin.register(Team)
