@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Player(models.Model):
@@ -11,6 +12,32 @@ class Player(models.Model):
     available = models.BooleanField(default=True)
     injured = models.BooleanField(default=False)
     fees_paid = models.BooleanField(default=False)
+
+    # --- NEW: preferred playing positions (numbers only) ---
+    # Use 1..23 so it works for starters + bench numbering
+    pref_pos1 = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(23)],
+        help_text="1st preferred position number (1-23)",
+    )
+    pref_pos2 = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(23)],
+        help_text="2nd preferred position number (1-23)",
+    )
+    pref_pos3 = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(23)],
+        help_text="3rd preferred position number (1-23)",
+    )
+
+    @property
+    def pref_positions_display(self) -> str:
+        nums = [self.pref_pos1, self.pref_pos2, self.pref_pos3]
+        return ",".join(str(n) for n in nums if n is not None)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

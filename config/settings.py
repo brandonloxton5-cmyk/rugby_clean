@@ -86,16 +86,27 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # ------------------------------------------------------------
-# Database (Render Postgres via DATABASE_URL)
+# Database
 # ------------------------------------------------------------
-# Uses DATABASE_URL if set (Render Postgres). Falls back to SQLite locally.
-DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        ssl_require=not DEBUG,
-    )
-}
+# Render: DATABASE_URL present → Postgres with SSL
+# Local:  no DATABASE_URL → SQLite (NO sslmode)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # ------------------------------------------------------------
 # Password validation

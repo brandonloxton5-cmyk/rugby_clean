@@ -3,40 +3,46 @@
 
 {% block content %}
   <div class="card">
-    <h1>Bobbies Managers Portal</h1>
-    <p>Choose what you want to view or manage. Clean, fast, WhatsApp-friendly.</p>
-    <div style="width:240px;height:6px;background:#e8c33d;border-radius:999px;margin-top:12px;"></div>
+    <h1 style="margin:0 0 8px 0;">Bobbies Managers Portal</h1>
+    <p style="margin:0;color:var(--muted);">
+      Choose what you want to view or manage. Clean, fast, WhatsApp-friendly.
+    </p>
+    <div style="width:240px;height:6px;background:var(--yellow);border-radius:999px;margin-top:12px;"></div>
   </div>
 
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:22px;">
 
     <div class="card">
-      <div style="width:96px;height:8px;background:#205791;border-radius:999px;margin-bottom:12px;"></div>
-      <h2>View Team Board</h2>
-      <p>
-        Read-only live team sheet (perfect for screenshots & WhatsApp).<br>
-        Anyone allowed can view.
+      <div style="width:96px;height:8px;background:var(--blue);border-radius:999px;margin-bottom:12px;"></div>
+      <h2 style="margin:0 0 8px 0;">View Team Board</h2>
+      <p style="margin:0 0 12px 0;color:var(--muted);">
+        Read-only live team sheet (perfect for screenshots & WhatsApp).
       </p>
+      <a class="pill" style="border-color:var(--blue);" href="{% url 'live_board' %}">Open</a>
     </div>
 
     <div class="card">
-      <div style="width:96px;height:8px;background:#3a8460;border-radius:999px;margin-bottom:12px;"></div>
-      <h2>Edit Team Board</h2>
-      <p>
-        Fast edit board (assign / clear players).<br>
-        Exec / Coaches only.
+      <div style="width:96px;height:8px;background:var(--green);border-radius:999px;margin-bottom:12px;"></div>
+      <h2 style="margin:0 0 8px 0;">Edit Team Board</h2>
+      <p style="margin:0 0 12px 0;color:var(--muted);">
+        Fast edit board (assign / clear players). Exec / Coaches only.
       </p>
+
+      {% if can_edit %}
+        <a class="pill" style="border-color:var(--green);" href="{% url 'selection' %}">Open Editor</a>
+      {% else %}
+        <span class="chip">Login required to edit.</span>
+      {% endif %}
     </div>
 
     <div class="card">
-      <div style="width:96px;height:8px;background:#b02c33;border-radius:999px;margin-bottom:12px;"></div>
-      <h2>Managers Bulletin</h2>
-      <p>
-        Tasks that must be done (add / done).<br>
-        View for all, edit for Exec.
+      <div style="width:96px;height:8px;background:var(--red);border-radius:999px;margin-bottom:12px;"></div>
+      <h2 style="margin:0 0 8px 0;">Managers Bulletin</h2>
+      <p style="margin:0 0 12px 0;color:var(--muted);">
+        Tasks that must be done (add / done).
       </p>
+      <a class="pill" style="border-color:var(--red);" href="/bulletin/">Open Bulletin</a>
     </div>
 
   </div>
-
 {% endblock %}
